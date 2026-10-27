@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NLP Mini Project Report</title>
+  <meta name="description" content="NLP Mini Project Report covering Tokenization, Stemming, Lemmatization, BOW and TF-IDF" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman:ital,wght@0,400;0,700;1,400&family=Georgia&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== GLOBAL RESET & BASE ===================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:   #1a3a6b;
+      --accent:    #c8102e;
+      --gold:      #c9a84c;
+      --text:      #1a1a1a;
+      --light-text:#444;
+      --border:    #c0c0c0;
+      --light-bg:  #f5f5f0;
+      --code-bg:   #f0f0f0;
+    }
+
+    body {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 12pt;
+      color: var(--text);
+      background: #e8e8e8;
+      line-height: 1.7;
+    }
+
+    /* ===== PAGE SIMULATION ========================================= */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      margin: 16px auto;
+      padding: 25mm 25mm 28mm 28mm;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      position: relative;
+      page-break-after: always;
+    }
+
+    /* ===== PAGE NUMBER FOOTER ====================================== */
+    .page-footer {
+      position: absolute;
+      bottom: 12mm;
+      left: 28mm;
+      right: 25mm;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9pt;
+      color: var(--light-text);
+      border-top: 1px solid var(--border);
+      padding-top: 4px;
+    }
+
+    .page-footer .footer-title {
+      font-style: italic;
+    }
+
+    .page-footer .page-num {
+      font-weight: 700;
+      font-size: 10pt;
+    }
+
+    /* ===== PAGE HEADER (for inner pages) =========================== */
+    .page-header {
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 6px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .page-header span {
+      font-size: 9pt;
+      color: var(--light-text);
+      font-style: italic;
+    }
+
+    .page-header strong {
+      font-size: 9pt;
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ===== PAGE 1: TITLE PAGE ====================================== */
+    .title-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      min-height: 247mm;
+    }
+
+    .univ-header {
+      width: 100%;
+      border-bottom: 3px double var(--primary);
+      padding-bottom: 14px;
+      margin-bottom: 0;
+    }
+
+    .univ-logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 10px;
+    }
+
+    .univ-crest {
+      width: 72px;
+      height: 72px;
+    }
+
+    .univ-name {
+      font-size: 17pt;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+      text-align: left;
+    }
+
+    .univ-sub {
+      font-size: 10pt;
+      color: var(--light-text);
+      font-style: italic;
+      text-align: left;
+      margin-top: 2px;
+    }
+
+    .dept-name {
+      font-size: 11pt;
+      color: var(--accent);
+      font-weight: 600;
+      margin-top: 6px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .title-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0;
+      gap: 12px;
+    }
+
+    .report-label {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--light-text);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: 2px solid var(--border);
+      padding: 5px 24px;
+      border-radius: 2px;
+    }
+
+    .report-title {
+      font-size: 26pt;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+      margin: 12px 0 4px;
+    }
+
+    .title-rule {
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border: none;
+      margin: 8px auto;
+    }
+
+    .report-subtitle {
+      font-size: 13pt;
+      color: var(--light-text);
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .tech-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .tech-chip {
+      font-size: 9pt;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 2px;
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .student-box {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      padding: 16px 24px;
+      background: var(--light-bg);
+      margin-top: 10px;
+    }
+
+    .student-box h3 {
+      font-size: 10pt;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--light-text);
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+
+    .student-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 24px;
+      text-align: left;
+    }
+
+    .student-field label {
+      font-size: 8.5pt;
+      text-transform: uppercase;
+      color: var(--light-text);
+      letter-spacing: 0.06em;
+      display: block;
+      margin-bottom: 1px;
+    }
+
+    .student-field span {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .submission-box {
+      width: 100%;
+      border-top: 2px solid var(--primary);
+      padding-top: 12px;
+      font-size: 10pt;
+      color: var(--light-text);
+      text-align: center;
+    }
+
+    .submission-box strong { color: var(--primary); }
+
+    /* ===== PAGE 2: TABLE OF CONTENTS ============================== */
+    .toc-title {
+      font-size: 18pt;
+      font-weight: 700;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .toc-divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border: none;
+      margin: 0 auto 24px;
+    }
+
+    .toc-list {
+      list-style: none;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 10px;
+      font-size: 11pt;
+    }
+
+    .toc-item.toc-chapter {
+      font-size: 12pt;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    .toc-item.toc-sub {
+      font-size: 10.5pt;
+      padding-left: 24px;
+      color: var(--light-text);
+    }
+
+    .toc-item .toc-num {
+      min-width: 40px;
+      font-weight: 700;
+    }
+
+    .toc-item .toc-text {
+      flex: 1;
+    }
+
+    .toc-dots {
+      flex: 1;
+      border-bottom: 1.5px dotted var(--border);
+      margin: 0 8px 4px;
+    }
+
+    .toc-pg {
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 28px;
+      text-align: right;
+    }
+
+    /* ===== CHAPTER HEADINGS ======================================== */
+    .chapter-header {
+      background: linear-gradient(135deg, var(--primary) 0%, #2a5298 100%);
+      color: white;
+      padding: 14px 20px;
+      margin: -25mm -25mm 22px -28mm;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .chapter-num {
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      background: rgba(255,255,255,0.15);
+      padding: 3px 10px;
+      border-radius: 2px;
+    }
+
+    .chapter-title {
+      font-size: 16pt;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .chapter-accent {
+      width: 4px;
+      height: 36px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+
+    /* ===== SECTION HEADINGS ======================================= */
+    h2.section-h {
+      font-size: 13pt;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 20px 0 8px;
+      padding-bottom: 4px;
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    h3.subsec-h {
+      font-size: 11.5pt;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 14px 0 6px;
+    }
+
+    /* ===== BODY TEXT ============================================== */
+    p.body-text {
+      text-align: justify;
+      hyphens: auto;
+      margin-bottom: 10px;
+      font-size: 11.5pt;
+      line-height: 1.75;
+    }
+
+    p.body-text + p.body-text {
+      text-indent: 1.5em;
+    }
+
+    /* ===== CALLOUT / DEFINITION BOX =============================== */
+    .def-box {
+      border-left: 4px solid var(--primary);
+      background: var(--light-bg);
+      padding: 10px 16px;
+      margin: 12px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .def-box .def-term {
+      font-size: 10pt;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 4px;
+    }
+
+    .def-box p {
+      font-size: 11pt;
+      font-style: italic;
+      color: var(--light-text);
+    }
+
+    /* ===== CODE / FORMULA BOX ===================================== */
+    .formula-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin: 12px 0;
+      font-family: 'Source Code Pro', 'Courier New', monospace;
+      font-size: 10pt;
+      line-height: 1.8;
+    }
+
+    .formula-box .formula-label {
+      font-size: 9pt;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .formula-box code {
+      color: #1a1a6e;
+      font-weight: 600;
+    }
+
+    /* ===== COMPARISON TABLE ======================================= */
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 10.5pt;
+    }
+
+    .report-table caption {
+      font-size: 9.5pt;
+      font-style: italic;
+      color: var(--light-text);
+      margin-bottom: 6px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .report-table th {
+      background: var(--primary);
+      color: white;
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 10pt;
+      letter-spacing: 0.03em;
+    }
+
+    .report-table td {
+      padding: 7px 12px;
+      border-bottom: 1px solid #ddd;
+      vertical-align: top;
+    }
+
+    .report-table tbody tr:nth-child(even) {
+      background: var(--light-bg);
+    }
+
+    .report-table tbody tr:hover {
+      background: #e8eef8;
+    }
+
+    .td-code {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 9.5pt;
+      color: #1a1a6e;
+    }
+
+    .td-green { color: #1a7a1a; font-weight: 600; }
+    .td-red   { color: #c8102e; font-weight: 600; }
+
+    /* ===== OUTPUT BOX ============================================= */
+    .output-box {
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      margin: 12px 0;
+    }
+
+    .output-box .output-label {
+      background: #2a2a2a;
+      color: #e0e0e0;
+      font-size: 8.5pt;
+      font-weight: 700;
+      padding: 5px 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 4px 4px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .output-box .output-label::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+
+    .output-box pre {
+      background: #1a1a2e;
+      color: #e2e8f0;
+      font-family: 'Source Code Pro', monospace;
+      font-size: 8.5pt;
+      line-height: 1.6;
+      padding: 12px 16px;
+      border-radius: 0 0 4px 4px;
+      overflow: hidden;
+    }
+
+    .out-key   { color: #818cf8; font-weight: 600; }
+    .out-val   { color: #4ade80; }
+    .out-str   { color: #fb923c; }
+    .out-num   { color: #38bdf8; }
+    .out-head  { color: #f472b6; font-weight: 700; }
+
+    /* ===== HIGHLIGHT BOX ========================================= */
+    .highlight-box {
+      border: 2px solid var(--gold);
+      background: #fffbf0;
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin: 12px 0;
+    }
+
+    .highlight-box .hl-title {
+      font-size: 10pt;
+      font-weight: 700;
+      color: #7a6000;
+      margin-bottom: 6px;
+    }
+
+    .highlight-box ul {
+      padding-left: 18px;
+      font-size: 11pt;
+    }
+
+    .highlight-box li {
+      margin-bottom: 4px;
+    }
+
+    /* ===== FIGURE ================================================= */
+    .figure {
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .figure-caption {
+      font-size: 9.5pt;
+      font-style: italic;
+      color: var(--light-text);
+      margin-top: 6px;
+    }
+
+    .diagram-box {
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 18px;
+      background: var(--light-bg);
+      display: inline-block;
+      width: 100%;
+    }
+
+    .pipeline-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .pipeline-step {
+      background: var(--primary);
+      color: white;
+      font-size: 9pt;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 4px;
+      text-align: center;
+      min-width: 90px;
+    }
+
+    .pipeline-arrow {
+      font-size: 18pt;
+      color: var(--primary);
+      padding: 0 4px;
+    }
+
+    /* ===== RESULTS CARDS ========================================= */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .result-card {
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .result-card .model-name {
+      font-size: 9pt;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
+    .result-card .accuracy {
+      font-size: 22pt;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .result-card .acc-label {
+      font-size: 8.5pt;
+      color: var(--light-text);
+      margin-top: 2px;
+    }
+
+    .result-card .features {
+      font-size: 8.5pt;
+      color: var(--light-text);
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    /* ===== PRINT STYLES ========================================== */
+    @media print {
+      body { background: white; font-size: 11pt; }
+      .page {
+        box-shadow: none;
+        margin: 0;
+        width: 100%;
+        padding: 20mm 20mm 24mm 24mm;
+        min-height: 0;
+        page-break-after: always;
+      }
+      .chapter-header {
+        margin: -20mm -20mm 20px -24mm;
+      }
+      .page-footer { bottom: 8mm; }
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     PAGE 1: TITLE PAGE
+     ================================================================ -->
+<div class="page" id="page-1">
+  <div class="title-page">
+
+    <!-- University Header -->
+    <div class="univ-header">
+      <div class="univ-logo-row">
+        <!-- University Crest SVG -->
+        <svg class="univ-crest" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" stroke="#1a3a6b" stroke-width="3" fill="#f5f5f0"/>
+          <path d="M50 12 L50 88" stroke="#1a3a6b" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <path d="M12 50 L88 50" stroke="#1a3a6b" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <polygon points="50,16 60,36 82,36 65,50 72,72 50,59 28,72 35,50 18,36 40,36" fill="#c9a84c" opacity="0.85"/>
+          <text x="50" y="92" text-anchor="middle" font-size="7" font-weight="700" fill="#1a3a6b" font-family="serif" letter-spacing="1">KNOWLEDGE</text>
+        </svg>
+        <div>
+          <div class="univ-name">ABC University of Technology</div>
+          <div class="univ-sub">Established 2001 — Accredited by UGC, NAAC Grade A+</div>
+          <div class="dept-name">Department of Computer Science & Engineering</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Title Body -->
+    <div class="title-body">
+      <div class="report-label">Mini Project Report</div>
+
+      <div class="report-title">Natural Language<br/>Processing (NLP)<br/>Mini Project</div>
+
+      <hr class="title-rule" />
+
+      <div class="report-subtitle">
+        A Comprehensive Study of Text Preprocessing and<br/>
+        Feature Extraction Techniques in NLP
+      </div>
+
+      <div class="tech-chips">
+        <span class="tech-chip">Tokenization</span>
+        <span class="tech-chip">Stemming</span>
+        <span class="tech-chip">Lemmatization</span>
+        <span class="tech-chip">Bag of Words</span>
+        <span class="tech-chip">TF-IDF</span>
+        <span class="tech-chip">Text Classification</span>
+      </div>
+    </div>
+
+    <!-- Student Details -->
+    <div class="student-box">
+      <h3>Submitted By</h3>
+      <div class="student-grid">
+        <div class="student-field">
+          <label>Student Name</label>
+          <span>__________________________</span>
+        </div>
+        <div class="student-field">
+          <label>Roll Number</label>
+          <span>__________________________</span>
+        </div>
+        <div class="student-field">
+          <label>Programme</label>
+          <span>B.Tech – Computer Science</span>
+        </div>
+        <div class="student-field">
+          <label>Semester</label>
+          <span>__________________________</span>
+        </div>
+        <div class="student-field">
+          <label>Subject</label>
+          <span>Natural Language Processing</span>
+        </div>
+        <div class="student-field">
+          <label>Subject Code</label>
+          <span>CS-NLP-401</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submission Info -->
+    <div class="submission-box">
+      <strong>Submitted To:</strong> Prof. __________________________
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      <strong>Session:</strong> 2025–2026
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      <strong>Date:</strong> October 2026
+    </div>
+
+  </div>
+  <!-- No footer on title page -->
+</div>
+
+
+<!-- ================================================================
+     PAGE 2: TABLE OF CONTENTS
+     ================================================================ -->
+<div class="page" id="page-2">
+  <div class="page-header">
+    <strong>NLP Mini Project Report</strong>
+    <span>Department of Computer Science & Engineering</span>
+  </div>
+
+  <div class="toc-title">Table of Contents</div>
+  <hr class="toc-divider" />
+
+  <ul class="toc-list">
+    <li class="toc-item">
+      <span class="toc-num">—</span>
+      <span class="toc-text">Declaration &amp; Certificate</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">i</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">1.</span>
+      <span class="toc-text">Introduction &amp; Objectives</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">3</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">1.1</span>
+      <span class="toc-text">What is Natural Language Processing?</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">3</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">1.2</span>
+      <span class="toc-text">Project Objectives</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">3</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">1.3</span>
+      <span class="toc-text">Technologies Used</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">3</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">2.</span>
+      <span class="toc-text">Tokenization</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">4</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">2.1</span>
+      <span class="toc-text">Word Tokenization</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">4</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">2.2</span>
+      <span class="toc-text">Sentence Tokenization</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">4</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">2.3</span>
+      <span class="toc-text">Stopword Removal</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">4</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">3.</span>
+      <span class="toc-text">Stemming</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">5</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">3.1</span>
+      <span class="toc-text">Porter Stemmer</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">5</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">3.2</span>
+      <span class="toc-text">Snowball Stemmer</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">5</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">4.</span>
+      <span class="toc-text">Lemmatization</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">6</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">4.1</span>
+      <span class="toc-text">WordNet Lemmatizer</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">6</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">4.2</span>
+      <span class="toc-text">Stemming vs Lemmatization — Comparison</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">6</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">5.</span>
+      <span class="toc-text">Bag of Words (BOW)</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">7</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">5.1</span>
+      <span class="toc-text">Manual Implementation from Scratch</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">7</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">5.2</span>
+      <span class="toc-text">Document-Term Matrix using sklearn</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">7</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">6.</span>
+      <span class="toc-text">TF-IDF (Term Frequency – Inverse Document Frequency)</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">8</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">6.1</span>
+      <span class="toc-text">Mathematical Formulation</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">8</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">6.2</span>
+      <span class="toc-text">BOW vs TF-IDF — Comparison</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">8</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">7.</span>
+      <span class="toc-text">Text Classification</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">9</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">7.1</span>
+      <span class="toc-text">Dataset: NLTK Movie Reviews</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">9</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">7.2</span>
+      <span class="toc-text">Classification Models</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">9</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">8.</span>
+      <span class="toc-text">Results &amp; Output Analysis</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">10</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">9.</span>
+      <span class="toc-text">Conclusion &amp; Future Scope</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">11</span>
+    </li>
+
+    <li class="toc-item toc-chapter">
+      <span class="toc-num">10.</span>
+      <span class="toc-text">References</span>
+      <span class="toc-dots"></span>
+      <span class="toc-pg">12</span>
+    </li>
+  </ul>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">i</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 3: INTRODUCTION & OBJECTIVES
+     ================================================================ -->
+<div class="page" id="page-3">
+  <div class="page-header">
+    <strong>Chapter 1 — Introduction &amp; Objectives</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 1</div>
+    <div class="chapter-title">Introduction &amp; Objectives</div>
+  </div>
+
+  <h2 class="section-h">1.1 &nbsp; What is Natural Language Processing?</h2>
+
+  <p class="body-text">
+    Natural Language Processing (NLP) is a branch of Artificial Intelligence (AI) that focuses on the interaction between computers and human (natural) language. It enables machines to read, understand, interpret, and generate text in a meaningful and contextually accurate way. NLP sits at the intersection of computer science, linguistics, and statistics.
+  </p>
+  <p class="body-text">
+    The core challenge in NLP is that human language is inherently ambiguous, context-dependent, and ever-evolving. Words carry different meanings depending on context, grammar, and intent. NLP techniques provide a structured pipeline to convert raw unstructured text into machine-readable numerical representations suitable for downstream tasks such as classification, translation, sentiment analysis, and question answering.
+  </p>
+
+  <div class="figure">
+    <div class="diagram-box">
+      <div class="pipeline-flow">
+        <div class="pipeline-step">Raw Text</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Tokenization</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Normalization<br/><small>(Stem/Lemma)</small></div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Feature<br/>Extraction</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">ML Model</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Output</div>
+      </div>
+    </div>
+    <div class="figure-caption">Figure 1.1 — A typical NLP processing pipeline</div>
+  </div>
+
+  <h2 class="section-h">1.2 &nbsp; Project Objectives</h2>
+
+  <p class="body-text">The primary objectives of this mini project are:</p>
+  <div class="highlight-box">
+    <div class="hl-title">Project Goals</div>
+    <ul>
+      <li>To implement and demonstrate <strong>Word Tokenization</strong> and <strong>Sentence Tokenization</strong> using the NLTK library.</li>
+      <li>To apply <strong>Stemming</strong> using two algorithms — Porter Stemmer and Snowball Stemmer — and compare their outputs.</li>
+      <li>To implement <strong>Lemmatization</strong> using the WordNet Lemmatizer with POS-tag awareness and compare it with stemming.</li>
+      <li>To build a <strong>Bag of Words (BOW)</strong> model both from scratch and using scikit-learn's <code>CountVectorizer</code>.</li>
+      <li>To implement <strong>TF-IDF</strong> from scratch using the mathematical formula and compare it with scikit-learn's <code>TfidfVectorizer</code>.</li>
+      <li>To perform <strong>Text Classification</strong> on the NLTK Movie Reviews dataset using BOW and TF-IDF features with Naive Bayes, Logistic Regression, and SVM classifiers.</li>
+      <li>To build an <strong>interactive web dashboard</strong> that demonstrates all techniques in real time.</li>
+    </ul>
+  </div>
+
+  <h2 class="section-h">1.3 &nbsp; Technologies Used</h2>
+  <table class="report-table">
+    <caption>Table 1.1 — Tools and libraries used in this project</caption>
+    <thead>
+      <tr><th>Tool / Library</th><th>Version</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Python</td><td>3.14+</td><td>Primary programming language</td></tr>
+      <tr><td>NLTK</td><td>3.10.4</td><td>Tokenization, Stemming, Lemmatization, Corpus</td></tr>
+      <tr><td>scikit-learn</td><td>1.9.1</td><td>CountVectorizer, TfidfVectorizer, Classifiers</td></tr>
+      <tr><td>NumPy</td><td>2.4.4</td><td>Numerical array operations</td></tr>
+      <tr><td>Pandas</td><td>3.0.2</td><td>DataFrame operations and tabular display</td></tr>
+      <tr><td>Matplotlib / Seaborn</td><td>3.11.2 / 0.13.2</td><td>Data visualization</td></tr>
+      <tr><td>HTML / CSS / JavaScript</td><td>—</td><td>Interactive web dashboard</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">3</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 4: TOKENIZATION
+     ================================================================ -->
+<div class="page" id="page-4">
+  <div class="page-header">
+    <strong>Chapter 2 — Tokenization</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 2</div>
+    <div class="chapter-title">Tokenization</div>
+  </div>
+
+  <div class="def-box">
+    <div class="def-term">Definition</div>
+    <p>Tokenization is the process of splitting a string of text into a list of tokens (words, sentences, or subwords). It is the <em>first and most fundamental</em> step in any NLP pipeline.</p>
+  </div>
+
+  <h2 class="section-h">2.1 &nbsp; Word Tokenization</h2>
+  <p class="body-text">
+    Word tokenization splits a text into individual words and punctuation marks. NLTK's <code>word_tokenize()</code> function uses the Penn Treebank tokenizer, which handles contractions (e.g., "don't" → ["do", "n't"]), punctuation, and abbreviations intelligently.
+  </p>
+
+  <div class="formula-box">
+    <div class="formula-label">Python Code</div>
+    <code>from nltk.tokenize import word_tokenize<br/>
+tokens = word_tokenize("The running dogs are happily playing.")<br/>
+# Output: ['The', 'running', 'dogs', 'are', 'happily', 'playing', '.']</code>
+  </div>
+
+  <div class="output-box">
+    <div class="output-label">Terminal Output — Word Tokenization (32 tokens)</div>
+    <pre><span class="out-head">[*] Word Tokenization (32 tokens):</span>
+   <span class="out-str">['Natural', 'language', 'processing', 'is', 'an', 'exciting', 'field',
+    'of', 'artificial', 'intelligence', '.', 'Machines', 'are', 'learning',
+    'to', 'understand', 'and', 'generate', 'human', 'languages', '.', 'The',
+    'running', 'dogs', 'were', 'happily', 'playing', 'in', 'the', 'beautiful',
+    'gardens', '.']</span></pre>
+  </div>
+
+  <h2 class="section-h">2.2 &nbsp; Sentence Tokenization</h2>
+  <p class="body-text">
+    Sentence tokenization (or sentence boundary detection) splits a paragraph into individual sentences using NLTK's <code>sent_tokenize()</code>, which uses a Punkt model trained on unsupervised data. It correctly handles abbreviations and special cases.
+  </p>
+
+  <div class="output-box">
+    <div class="output-label">Terminal Output — Sentence Tokenization (3 sentences)</div>
+    <pre><span class="out-head">[*] Sentence Tokenization (3 sentences):</span>
+   <span class="out-num">1.</span> <span class="out-str">Natural language processing is an exciting field of artificial intelligence.</span>
+   <span class="out-num">2.</span> <span class="out-str">Machines are learning to understand and generate human languages.</span>
+   <span class="out-num">3.</span> <span class="out-str">The running dogs were happily playing in the beautiful gardens.</span></pre>
+  </div>
+
+  <h2 class="section-h">2.3 &nbsp; Stopword Removal</h2>
+  <p class="body-text">
+    After tokenization, stopwords — extremely common words such as "the", "is", "and", "a" — are removed. These words carry little semantic information and can degrade model performance if included in feature vectors. NLTK provides a list of 179 English stopwords via <code>nltk.corpus.stopwords</code>.
+  </p>
+
+  <table class="report-table">
+    <caption>Table 2.1 — Effect of Stopword Removal on Token Count</caption>
+    <thead>
+      <tr><th>Text</th><th>Before Cleaning</th><th>After Cleaning</th><th>Reduction</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Sample 3-sentence text</td>
+        <td>29 words</td>
+        <td>19 words</td>
+        <td class="td-green">34.5%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="output-box">
+    <div class="output-label">Terminal Output — Clean Tokens (19 tokens after removing stopwords)</div>
+    <pre><span class="out-head">[*] After Cleaning (stopwords + punct removed) -- 19 tokens:</span>
+   <span class="out-str">['natural', 'language', 'processing', 'exciting', 'field', 'artificial',
+    'intelligence', 'machines', 'learning', 'understand', 'generate',
+    'human', 'languages', 'running', 'dogs', 'happily', 'playing',
+    'beautiful', 'gardens']</span></pre>
+  </div>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">4</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 5: STEMMING
+     ================================================================ -->
+<div class="page" id="page-5">
+  <div class="page-header">
+    <strong>Chapter 3 — Stemming</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 3</div>
+    <div class="chapter-title">Stemming</div>
+  </div>
+
+  <div class="def-box">
+    <div class="def-term">Definition</div>
+    <p>Stemming is the process of reducing a word to its root or base form by removing suffixes and prefixes using heuristic rules. The resulting stem may not be a valid dictionary word.</p>
+  </div>
+
+  <p class="body-text">
+    Stemming is widely used in Information Retrieval systems (search engines) where speed is more important than linguistic precision. The goal is to ensure that words like "run", "running", "runs", and "runner" all map to the same stem — "run".
+  </p>
+
+  <h2 class="section-h">3.1 &nbsp; Porter Stemmer</h2>
+  <p class="body-text">
+    The Porter Stemming Algorithm, proposed by Martin Porter in 1980, is one of the most well-known stemming algorithms. It applies a sequence of five steps, each stripping a set of suffixes from the word using a measure of the stem's remaining length. While fast and simple, it can produce non-word stems (e.g., "beautiful" → "beauti").
+  </p>
+
+  <div class="formula-box">
+    <div class="formula-label">Python Code — Porter Stemmer</div>
+    <code>from nltk.stem import PorterStemmer<br/>
+stemmer = PorterStemmer()<br/>
+print(stemmer.stem("running"))     # → run<br/>
+print(stemmer.stem("beautiful"))   # → beauti<br/>
+print(stemmer.stem("processing"))  # → process</code>
+  </div>
+
+  <h2 class="section-h">3.2 &nbsp; Snowball Stemmer</h2>
+  <p class="body-text">
+    The Snowball Stemmer (also called the English Stemmer) is an improved version of the Porter Stemmer. It is part of the Snowball programming framework for designing stemming algorithms. Snowball is slightly more aggressive and supports multiple languages including English, French, German, Spanish, and more.
+  </p>
+
+  <div class="formula-box">
+    <div class="formula-label">Python Code — Snowball Stemmer</div>
+    <code>from nltk.stem import SnowballStemmer<br/>
+stemmer = SnowballStemmer("english")<br/>
+print(stemmer.stem("generate"))    # → generat<br/>
+print(stemmer.stem("languages"))   # → languag</code>
+  </div>
+
+  <table class="report-table">
+    <caption>Table 3.1 — Porter vs Snowball Stemming Output Comparison</caption>
+    <thead>
+      <tr><th>Original Word</th><th>Porter Stem</th><th>Snowball Stem</th><th>Observation</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>natural</td><td class="td-code">natur</td><td class="td-code">natur</td><td>Both produce same stem</td></tr>
+      <tr><td>language</td><td class="td-code">languag</td><td class="td-code">languag</td><td>Suffix -e removed</td></tr>
+      <tr><td>processing</td><td class="td-code">process</td><td class="td-code">process</td><td>-ing removed cleanly</td></tr>
+      <tr><td>exciting</td><td class="td-code">excit</td><td class="td-code">excit</td><td>Not a valid word</td></tr>
+      <tr><td>artificial</td><td class="td-code">artifici</td><td class="td-code">artifici</td><td>Not a valid word</td></tr>
+      <tr><td>intelligence</td><td class="td-code">intellig</td><td class="td-code">intellig</td><td>Not a valid word</td></tr>
+      <tr><td>generate</td><td class="td-code td-green">gener</td><td class="td-code td-red">generat</td><td>Snowball more aggressive</td></tr>
+      <tr><td>running</td><td class="td-code">run</td><td class="td-code">run</td><td>Both correct</td></tr>
+      <tr><td>happily</td><td class="td-code">happili</td><td class="td-code">happili</td><td>Not a valid word</td></tr>
+      <tr><td>beautiful</td><td class="td-code">beauti</td><td class="td-code">beauti</td><td>Not a valid word</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box">
+    <div class="hl-title">Key Observations — Stemming</div>
+    <ul>
+      <li>Porter and Snowball produce <strong>identical results</strong> for most common words.</li>
+      <li>Snowball is slightly <strong>more aggressive</strong> (e.g., "generate" → "generat" vs "gener").</li>
+      <li>Both stemmers may produce <strong>non-dictionary words</strong> (e.g., "beauti", "artifici").</li>
+      <li>Stemming is <strong>faster</strong> than lemmatization but <strong>less accurate</strong> linguistically.</li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">5</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 6: LEMMATIZATION
+     ================================================================ -->
+<div class="page" id="page-6">
+  <div class="page-header">
+    <strong>Chapter 4 — Lemmatization</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 4</div>
+    <div class="chapter-title">Lemmatization</div>
+  </div>
+
+  <div class="def-box">
+    <div class="def-term">Definition</div>
+    <p>Lemmatization is the process of reducing a word to its base or dictionary form (called the <em>lemma</em>), using vocabulary and morphological analysis. Unlike stemming, lemmatization always returns a valid dictionary word.</p>
+  </div>
+
+  <h2 class="section-h">4.1 &nbsp; WordNet Lemmatizer</h2>
+  <p class="body-text">
+    NLTK provides the <code>WordNetLemmatizer</code>, which uses the WordNet lexical database — a large English lexical resource containing over 155,000 words organized into synonym sets. Lemmatization is <em>POS-tag aware</em>, meaning that the same word can produce different lemmas depending on whether it is used as a verb, noun, or adjective.
+  </p>
+  <p class="body-text">
+    For example, "better" as an adjective lemmatizes to "good", while as a verb it lemmatizes to "better". Without POS tags, the lemmatizer defaults to treating words as nouns, which reduces accuracy significantly.
+  </p>
+
+  <div class="formula-box">
+    <div class="formula-label">Python Code — POS-Aware Lemmatization</div>
+    <code>from nltk.stem import WordNetLemmatizer<br/>
+from nltk import pos_tag<br/>
+lemmatizer = WordNetLemmatizer()<br/>
+<br/>
+# Without POS tag (defaults to NOUN):<br/>
+lemmatizer.lemmatize("running")         # → running (WRONG!)<br/>
+<br/>
+# With POS tag (verb context):<br/>
+lemmatizer.lemmatize("running", "v")   # → run (CORRECT!)<br/>
+lemmatizer.lemmatize("dogs",    "n")   # → dog<br/>
+lemmatizer.lemmatize("better",  "a")   # → good</code>
+  </div>
+
+  <h2 class="section-h">4.2 &nbsp; Stemming vs Lemmatization — Comparison</h2>
+  <p class="body-text">
+    The following table summarizes the actual output produced by our Python script, comparing the original word, Porter stem, Snowball stem, and WordNet lemma side by side.
+  </p>
+
+  <table class="report-table">
+    <caption>Table 4.1 — Actual Output: Stemming vs Lemmatization (from preprocessing.py)</caption>
+    <thead>
+      <tr><th>Original Word</th><th>Porter Stem</th><th>Snowball Stem</th><th>WordNet Lemma</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>natural</td><td class="td-code">natur</td><td class="td-code">natur</td><td class="td-code td-green">natural</td></tr>
+      <tr><td>language</td><td class="td-code">languag</td><td class="td-code">languag</td><td class="td-code td-green">language</td></tr>
+      <tr><td>processing</td><td class="td-code">process</td><td class="td-code">process</td><td class="td-code td-green">process</td></tr>
+      <tr><td>exciting</td><td class="td-code td-red">excit</td><td class="td-code td-red">excit</td><td class="td-code td-green">exciting</td></tr>
+      <tr><td>artificial</td><td class="td-code td-red">artifici</td><td class="td-code td-red">artifici</td><td class="td-code td-green">artificial</td></tr>
+      <tr><td>machines</td><td class="td-code td-red">machin</td><td class="td-code td-red">machin</td><td class="td-code td-green">machine</td></tr>
+      <tr><td>running</td><td class="td-code">run</td><td class="td-code">run</td><td class="td-code td-green">run</td></tr>
+      <tr><td>dogs</td><td class="td-code">dog</td><td class="td-code">dog</td><td class="td-code td-green">dog</td></tr>
+      <tr><td>happily</td><td class="td-code td-red">happili</td><td class="td-code td-red">happili</td><td class="td-code td-green">happily</td></tr>
+      <tr><td>beautiful</td><td class="td-code td-red">beauti</td><td class="td-code td-red">beauti</td><td class="td-code td-green">beautiful</td></tr>
+      <tr><td>gardens</td><td class="td-code">garden</td><td class="td-code">garden</td><td class="td-code td-green">garden</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box">
+    <div class="hl-title">Stemming vs Lemmatization — When to Use Which?</div>
+    <ul>
+      <li><strong>Use Stemming</strong> when speed is critical (search engines, real-time systems) and linguistic accuracy is secondary.</li>
+      <li><strong>Use Lemmatization</strong> when accuracy is important (QA systems, chatbots, sentiment analysis, machine translation).</li>
+      <li>Lemmatization always produces <span style="color:green;font-weight:700">valid dictionary words</span>; stemming may not.</li>
+      <li>Lemmatization is computationally <strong>slower</strong> but semantically <strong>superior</strong>.</li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">6</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 7: BAG OF WORDS
+     ================================================================ -->
+<div class="page" id="page-7">
+  <div class="page-header">
+    <strong>Chapter 5 — Bag of Words (BOW)</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 5</div>
+    <div class="chapter-title">Bag of Words (BOW)</div>
+  </div>
+
+  <div class="def-box">
+    <div class="def-term">Definition</div>
+    <p>The Bag of Words (BOW) model represents a text document as an unordered collection (multiset) of its words, disregarding grammar and word order but keeping multiplicity (frequency count).</p>
+  </div>
+
+  <h2 class="section-h">5.1 &nbsp; Manual Implementation from Scratch</h2>
+  <p class="body-text">
+    In our implementation, we first built a global vocabulary from all documents, assigning each unique word a unique integer index. Then for each document, we created a vector of size equal to the vocabulary, filling it with word counts. This clearly demonstrates the internal mechanics of the BOW model.
+  </p>
+
+  <div class="formula-box">
+    <div class="formula-label">Algorithm — BOW from Scratch</div>
+    <code>Step 1: Build vocabulary V = {all unique words across all docs}<br/>
+Step 2: For each document d:<br/>
+        vector[i] = count of V[i] in document d<br/>
+Step 3: Return Document-Term Matrix (DTM) of shape (n_docs × |V|)</code>
+  </div>
+
+  <div class="output-box">
+    <div class="output-label">Terminal Output — Manual BOW Matrix (3 documents × 22 vocabulary)</div>
+    <pre><span class="out-head">[*] Manual BOW (from scratch):</span>
+   <span class="out-key">Vocabulary (first 10):</span> <span class="out-val">{'the': 0, 'cat': 1, 'sat': 2, 'on': 3, 'mat': 4, 'and': 5,
+                            'played': 6, 'with': 7, 'dog': 8, 'fetch': 9}</span>
+   <span class="out-key">BOW Matrix shape:</span> <span class="out-num">(3, 22)</span>
+   <span class="out-key">BOW Matrix:</span>
+   <span class="out-num">[[4 2 1 1 2 1 1 1 0 0]</span>   ← Doc 1: "cat sat on the mat..."
+   <span class="out-num"> [2 0 0 1 0 0 1 0 1 1]</span>   ← Doc 2: "dog played fetch..."
+   <span class="out-num"> [1 0 0 0 0 0 0 0 0 0]]</span>  ← Doc 3: "AI transforming..."</pre>
+  </div>
+
+  <h2 class="section-h">5.2 &nbsp; Document-Term Matrix using sklearn</h2>
+  <p class="body-text">
+    We used scikit-learn's <code>CountVectorizer</code> to produce the BOW matrix professionally, with built-in stopword removal, lowercasing, and vocabulary size limiting via <code>max_features</code>.
+  </p>
+
+  <div class="output-box">
+    <div class="output-label">Terminal Output — sklearn BOW DataFrame (top 15 words, 5 documents)</div>
+    <pre><span class="out-head">[*] BOW DataFrame (top 15 words):</span>
+<span class="out-key">           algorithms  amounts  artificial  cat  computers  data  day</span>
+<span class="out-str">Cat &amp; Mat</span>           <span class="out-num">0</span>        <span class="out-num">0</span>           <span class="out-num">0</span>    <span class="out-num">2</span>          <span class="out-num">0</span>     <span class="out-num">0</span>    <span class="out-num">0</span>
+<span class="out-str">Dog Park </span>           <span class="out-num">0</span>        <span class="out-num">0</span>           <span class="out-num">0</span>    <span class="out-num">0</span>          <span class="out-num">0</span>     <span class="out-num">0</span>    <span class="out-num">1</span>
+<span class="out-str">AI Tech  </span>           <span class="out-num">0</span>        <span class="out-num">0</span>           <span class="out-num">1</span>    <span class="out-num">0</span>          <span class="out-num">0</span>     <span class="out-num">0</span>    <span class="out-num">0</span>
+<span class="out-str">ML Data  </span>           <span class="out-num">1</span>        <span class="out-num">1</span>           <span class="out-num">0</span>    <span class="out-num">0</span>          <span class="out-num">0</span>     <span class="out-num">1</span>    <span class="out-num">0</span>
+<span class="out-str">NLP Text </span>           <span class="out-num">0</span>        <span class="out-num">0</span>           <span class="out-num">0</span>    <span class="out-num">0</span>          <span class="out-num">1</span>     <span class="out-num">0</span>    <span class="out-num">0</span></pre>
+  </div>
+
+  <div class="highlight-box">
+    <div class="hl-title">Limitations of Bag of Words</div>
+    <ul>
+      <li><strong>Order-insensitive:</strong> "I love NLP" and "NLP love I" produce the same BOW vector.</li>
+      <li><strong>High dimensionality:</strong> The vocabulary can be very large for large corpora.</li>
+      <li><strong>No semantic understanding:</strong> Synonyms like "happy" and "joyful" are treated as different words.</li>
+      <li><strong>Bias towards common words:</strong> Words like "the", "is" dominate if stopwords are not removed.</li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">7</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 8: TF-IDF
+     ================================================================ -->
+<div class="page" id="page-8">
+  <div class="page-header">
+    <strong>Chapter 6 — TF-IDF</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 6</div>
+    <div class="chapter-title">TF-IDF (Term Frequency – Inverse Document Frequency)</div>
+  </div>
+
+  <div class="def-box">
+    <div class="def-term">Definition</div>
+    <p>TF-IDF is a numerical statistic used to reflect how important a word is to a document within a corpus. It penalizes words that appear frequently across <em>all</em> documents and rewards words that are important to a <em>specific</em> document.</p>
+  </div>
+
+  <h2 class="section-h">6.1 &nbsp; Mathematical Formulation</h2>
+  <p class="body-text">
+    The TF-IDF score of a term <em>t</em> in document <em>d</em> is the product of two quantities: Term Frequency (TF) and Inverse Document Frequency (IDF).
+  </p>
+
+  <div class="formula-box">
+    <div class="formula-label">Mathematical Formulas</div>
+    <code>TF(t, d)  =  count(t in d) / total_words_in_d<br/>
+<br/>
+IDF(t)    =  log( N / (1 + df(t)) ) + 1<br/>
+             where N   = total number of documents<br/>
+                   df  = number of documents containing term t<br/>
+                   +1  = smoothing to avoid log(0)<br/>
+<br/>
+TF-IDF(t, d) =  TF(t, d)  ×  IDF(t)</code>
+  </div>
+
+  <p class="body-text">
+    A high TF-IDF score means the word appears frequently in the document (high TF) but rarely across other documents (high IDF) — making it a distinctive and important term. Common words like "the" have a very low IDF because they appear in almost every document.
+  </p>
+
+  <div class="output-box">
+    <div class="output-label">Terminal Output — TF-IDF Scores (from tfidf.py)</div>
+    <pre><span class="out-head">[*] TF scores for 'Cat &amp; Mat' (Doc 1):</span>
+   <span class="out-key">the                 </span> <span class="out-num">0.3077</span>   ← most frequent
+   <span class="out-key">cat                 </span> <span class="out-num">0.1538</span>
+   <span class="out-key">mat                 </span> <span class="out-num">0.1538</span>
+   <span class="out-key">sat, on, and, played</span> <span class="out-num">0.0769</span>
+
+<span class="out-head">[*] TF-IDF scores after IDF weighting:</span>
+   <span class="out-key">cat                 </span> <span class="out-num">0.2948</span>   ← unique word, high TF-IDF
+   <span class="out-key">mat                 </span> <span class="out-num">0.2948</span>   ← unique word, high TF-IDF
+   <span class="out-key">the                 </span> <span class="out-num">0.3764</span>   ← common but high TF in this doc
+
+<span class="out-head">[*] Top-3 TF-IDF terms per document:</span>
+   <span class="out-str">AI Tech  </span> → <span class="out-val">artificial</span> (0.7071), <span class="out-val">intelligence</span> (0.7071)
+   <span class="out-str">ML Data  </span> → <span class="out-val">algorithms</span>  (0.5000), <span class="out-val">machine</span>      (0.5000)
+   <span class="out-str">NLP Text </span> → <span class="out-val">natural</span>     (0.5000), <span class="out-val">language</span>    (0.5000)</pre>
+  </div>
+
+  <h2 class="section-h">6.2 &nbsp; BOW vs TF-IDF — Comparison</h2>
+
+  <table class="report-table">
+    <caption>Table 6.1 — BOW vs TF-IDF: Key Differences</caption>
+    <thead>
+      <tr><th>Aspect</th><th>Bag of Words (BOW)</th><th>TF-IDF</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Representation</td><td>Raw word counts</td><td>Weighted frequency scores</td></tr>
+      <tr><td>Common words</td><td class="td-red">High score (biased)</td><td class="td-green">Penalized by IDF</td></tr>
+      <tr><td>Rare unique words</td><td>Low score</td><td class="td-green">High score (rewarded)</td></tr>
+      <tr><td>Dimensionality</td><td>High</td><td>Same, but more informative</td></tr>
+      <tr><td>Context awareness</td><td>None</td><td>Corpus-level context</td></tr>
+      <tr><td>Best use case</td><td>Simple baselines</td><td>Text classification, IR</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">8</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 9: TEXT CLASSIFICATION
+     ================================================================ -->
+<div class="page" id="page-9">
+  <div class="page-header">
+    <strong>Chapter 7 — Text Classification</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 7</div>
+    <div class="chapter-title">Text Classification</div>
+  </div>
+
+  <p class="body-text">
+    Text classification is the task of assigning predefined categories to text documents. In this project, we demonstrate sentiment classification — determining whether a movie review is positive or negative — using the feature representations developed in previous chapters.
+  </p>
+
+  <h2 class="section-h">7.1 &nbsp; Dataset: NLTK Movie Reviews</h2>
+  <p class="body-text">
+    We use the <strong>NLTK Movie Reviews corpus</strong>, a benchmark dataset for sentiment analysis. The corpus was originally collected by Bo Pang and Lillian Lee and consists of 2,000 movie reviews from the IMDB website, split evenly between 1,000 positive and 1,000 negative reviews.
+  </p>
+
+  <table class="report-table">
+    <caption>Table 7.1 — Dataset Statistics</caption>
+    <thead>
+      <tr><th>Property</th><th>Value</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Total reviews</td><td>2,000</td></tr>
+      <tr><td>Positive reviews</td><td>1,000 (50%)</td></tr>
+      <tr><td>Negative reviews</td><td>1,000 (50%)</td></tr>
+      <tr><td>Training set (80%)</td><td>1,600 reviews</td></tr>
+      <tr><td>Test set (20%)</td><td>400 reviews</td></tr>
+      <tr><td>Average review length</td><td>~650 words</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="section-h">7.2 &nbsp; Classification Models</h2>
+  <p class="body-text">We trained three classification pipelines on this dataset, each combining a different feature extraction method with a machine learning algorithm:</p>
+
+  <h3 class="subsec-h">Pipeline 1: BOW + Multinomial Naive Bayes</h3>
+  <p class="body-text">
+    <code>CountVectorizer</code> (max_features=5000, unigrams+bigrams) is used to extract BOW features, which are then passed to a <code>MultinomialNB</code> classifier (alpha=0.1). Naive Bayes is a probabilistic classifier based on Bayes' Theorem with the "naive" assumption of feature independence.
+  </p>
+
+  <h3 class="subsec-h">Pipeline 2: TF-IDF + Logistic Regression</h3>
+  <p class="body-text">
+    <code>TfidfVectorizer</code> (max_features=5000, sublinear_tf=True, unigrams+bigrams) provides TF-IDF features. Logistic Regression is a linear classifier that models the probability of the positive class using the sigmoid function, optimized via L-BFGS.
+  </p>
+
+  <h3 class="subsec-h">Pipeline 3: TF-IDF + Linear SVM</h3>
+  <p class="body-text">
+    <code>TfidfVectorizer</code> with <code>LinearSVC</code> (C=1.0) — a Support Vector Machine with a linear kernel. SVMs are particularly effective for high-dimensional sparse text features, finding the maximum-margin hyperplane separating the two classes.
+  </p>
+
+  <div class="formula-box">
+    <div class="formula-label">Python Code — sklearn Pipeline</div>
+    <code>from sklearn.pipeline import Pipeline<br/>
+from sklearn.feature_extraction.text import TfidfVectorizer<br/>
+from sklearn.linear_model import LogisticRegression<br/>
+<br/>
+pipeline = Pipeline([<br/>
+    ("tfidf", TfidfVectorizer(max_features=5000, sublinear_tf=True)),<br/>
+    ("clf",   LogisticRegression(max_iter=1000, C=1.0)),<br/>
+])<br/>
+pipeline.fit(X_train, y_train)<br/>
+accuracy = pipeline.score(X_test, y_test)</code>
+  </div>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">9</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 10: RESULTS & OUTPUT ANALYSIS
+     ================================================================ -->
+<div class="page" id="page-10">
+  <div class="page-header">
+    <strong>Chapter 8 — Results &amp; Output Analysis</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 8</div>
+    <div class="chapter-title">Results &amp; Output Analysis</div>
+  </div>
+
+  <h2 class="section-h">8.1 &nbsp; Classification Accuracy Results</h2>
+
+  <div class="results-grid">
+    <div class="result-card">
+      <div class="model-name">BOW + Naive Bayes</div>
+      <div class="accuracy">~83%</div>
+      <div class="acc-label">Test Accuracy</div>
+      <div class="features">CountVectorizer<br/>Unigram + Bigram</div>
+    </div>
+    <div class="result-card">
+      <div class="model-name">TF-IDF + Logistic Regression</div>
+      <div class="accuracy">~87%</div>
+      <div class="acc-label">Test Accuracy</div>
+      <div class="features">TfidfVectorizer<br/>Sublinear TF</div>
+    </div>
+    <div class="result-card">
+      <div class="model-name">TF-IDF + Linear SVM</div>
+      <div class="accuracy">~88%</div>
+      <div class="acc-label">Test Accuracy</div>
+      <div class="features">TfidfVectorizer<br/>LinearSVC C=1.0</div>
+    </div>
+  </div>
+
+  <div class="output-box">
+    <div class="output-label">Terminal Output — Model Evaluation (classifier.py)</div>
+    <pre><span class="out-head">=======================================================
+  BOW + Multinomial Naive Bayes
+=======================================================</span>
+  <span class="out-key">[OK] Test Accuracy:</span> <span class="out-num">0.8325</span> (83.25%)
+
+  Classification Report:
+              precision    recall  f1-score   support
+         <span class="out-str">neg</span>       0.83      0.84      0.83       200
+         <span class="out-str">pos</span>       0.84      0.83      0.83       200
+    accuracy                           <span class="out-num">0.83</span>       400
+
+<span class="out-head">=======================================================
+  TF-IDF + Logistic Regression
+=======================================================</span>
+  <span class="out-key">[OK] Test Accuracy:</span> <span class="out-num">0.8700</span> (87.00%)
+
+<span class="out-head">=======================================================
+  TF-IDF + Linear SVM
+=======================================================</span>
+  <span class="out-key">[OK] Test Accuracy:</span> <span class="out-num">0.8775</span> (87.75%)</pre>
+  </div>
+
+  <h2 class="section-h">8.2 &nbsp; Live Sentiment Prediction</h2>
+
+  <div class="output-box">
+    <div class="output-label">Terminal Output — Live Prediction (TF-IDF + LR Model)</div>
+    <pre><span class="out-head">[*] LIVE PREDICTIONS (TF-IDF + LR)</span>
+
+  <span class="out-val">[POSITIVE]</span> Predicted: POS
+     Text: <span class="out-str">This movie was absolutely fantastic! The acting was superb...</span>
+
+  <span class="out-key">[NEGATIVE]</span> Predicted: NEG
+     Text: <span class="out-str">Terrible film. Complete waste of time. The plot made no sense...</span>
+
+  <span class="out-val">[POSITIVE]</span> Predicted: POS
+     Text: <span class="out-str">It was okay, not great but not terrible either. Some good moments.</span></pre>
+  </div>
+
+  <h2 class="section-h">8.3 &nbsp; Comparative Analysis Summary</h2>
+
+  <table class="report-table">
+    <caption>Table 8.1 — Summary of all NLP techniques implemented</caption>
+    <thead>
+      <tr><th>Technique</th><th>Library</th><th>Status</th><th>Key Output</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Word Tokenization</td><td>NLTK</td><td class="td-green">Verified ✔</td><td>32 tokens from 3-sentence text</td></tr>
+      <tr><td>Sentence Tokenization</td><td>NLTK</td><td class="td-green">Verified ✔</td><td>3 sentences correctly split</td></tr>
+      <tr><td>Stopword Removal</td><td>NLTK</td><td class="td-green">Verified ✔</td><td>29 → 19 tokens (34.5% reduction)</td></tr>
+      <tr><td>Porter Stemming</td><td>NLTK</td><td class="td-green">Verified ✔</td><td>Correct stems, some non-words</td></tr>
+      <tr><td>Snowball Stemming</td><td>NLTK</td><td class="td-green">Verified ✔</td><td>Slightly more aggressive</td></tr>
+      <tr><td>Lemmatization</td><td>NLTK WordNet</td><td class="td-green">Verified ✔</td><td>Valid words, POS-aware</td></tr>
+      <tr><td>BOW (from scratch)</td><td>Pure Python</td><td class="td-green">Verified ✔</td><td>Shape: (3, 22) matrix</td></tr>
+      <tr><td>BOW (sklearn)</td><td>scikit-learn</td><td class="td-green">Verified ✔</td><td>Shape: (5, 20) matrix</td></tr>
+      <tr><td>TF-IDF (from scratch)</td><td>Pure Python</td><td class="td-green">Verified ✔</td><td>Correct TF/IDF/TF-IDF scores</td></tr>
+      <tr><td>TF-IDF (sklearn)</td><td>scikit-learn</td><td class="td-green">Verified ✔</td><td>Weighted matrix</td></tr>
+      <tr><td>Text Classification</td><td>scikit-learn</td><td class="td-green">Verified ✔</td><td>Best: SVM 87.75% accuracy</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">10</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 11: CONCLUSION & FUTURE SCOPE
+     ================================================================ -->
+<div class="page" id="page-11">
+  <div class="page-header">
+    <strong>Chapter 9 — Conclusion &amp; Future Scope</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 9</div>
+    <div class="chapter-title">Conclusion &amp; Future Scope</div>
+  </div>
+
+  <h2 class="section-h">9.1 &nbsp; Conclusion</h2>
+  <p class="body-text">
+    This mini project successfully demonstrates the implementation and practical application of fundamental Natural Language Processing techniques. Starting from raw, unstructured text, we built a complete NLP pipeline that transforms it into machine-readable numerical representations suitable for machine learning tasks.
+  </p>
+  <p class="body-text">
+    Through hands-on implementation and real terminal output verification, the following key insights were established:
+  </p>
+  <div class="highlight-box">
+    <div class="hl-title">Key Findings</div>
+    <ul>
+      <li><strong>Tokenization</strong> is the essential first step — NLTK's <code>word_tokenize</code> intelligently handles contractions, abbreviations, and punctuation better than simple splitting on whitespace.</li>
+      <li><strong>Stopword removal</strong> reduced our token count by ~34.5%, significantly reducing computational overhead without losing semantic content.</li>
+      <li><strong>Stemming</strong> (Porter and Snowball) is fast but produces non-dictionary words like "beauti", "artifici", and "happili". Snowball is marginally more aggressive than Porter.</li>
+      <li><strong>Lemmatization</strong> always produces valid dictionary words and is semantically superior, but requires POS-tagging for best results. Without POS context, accuracy degrades significantly.</li>
+      <li><strong>Bag of Words</strong> provides a simple yet effective baseline. However, it treats all words equally regardless of their document-level importance.</li>
+      <li><strong>TF-IDF</strong> overcomes BOW's main weakness by down-weighting common words. It correctly identified "artificial + intelligence", "machine + learning", and "natural + language" as the most important terms for their respective documents.</li>
+      <li><strong>Text Classification</strong> results show that TF-IDF features consistently outperform raw BOW features across all classifiers. Linear SVM achieved the highest accuracy of ~87.75% on the Movie Reviews dataset.</li>
+    </ul>
+  </div>
+
+  <p class="body-text">
+    The project also produced an interactive web dashboard that allows users to enter any text and visualize the complete NLP pipeline — from tokenization to TF-IDF scoring — in real time, making it an effective educational tool.
+  </p>
+
+  <h2 class="section-h">9.2 &nbsp; Limitations</h2>
+  <p class="body-text">
+    The current implementation has several limitations: BOW and TF-IDF both ignore word order and context (e.g., "not good" and "good" would be treated similarly). Stemming produces linguistically incorrect stems. The classifier is trained only on movie reviews and may not generalize well to other domains.
+  </p>
+
+  <h2 class="section-h">9.3 &nbsp; Future Scope</h2>
+  <p class="body-text">This project can be extended in the following directions:</p>
+
+  <table class="report-table">
+    <caption>Table 9.1 — Possible Future Extensions</caption>
+    <thead>
+      <tr><th>Extension</th><th>Technology</th><th>Benefit</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Word Embeddings</td><td>Word2Vec, GloVe, FastText</td><td>Capture semantic similarity between words</td></tr>
+      <tr><td>Contextual Embeddings</td><td>BERT, RoBERTa, GPT</td><td>Context-aware representations</td></tr>
+      <tr><td>N-gram Language Models</td><td>NLTK, KenLM</td><td>Capture word order patterns</td></tr>
+      <tr><td>Named Entity Recognition</td><td>spaCy, Flair</td><td>Extract persons, places, organizations</td></tr>
+      <tr><td>Deep Learning Classifier</td><td>LSTM, Transformer</td><td>Better accuracy on complex sentiment</td></tr>
+      <tr><td>Multi-language NLP</td><td>multilingual BERT, mT5</td><td>Support non-English languages</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">11</span>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 12: REFERENCES
+     ================================================================ -->
+<div class="page" id="page-12">
+  <div class="page-header">
+    <strong>Chapter 10 — References</strong>
+    <span>NLP Mini Project Report</span>
+  </div>
+
+  <div class="chapter-header">
+    <div class="chapter-accent"></div>
+    <div class="chapter-num">Chapter 10</div>
+    <div class="chapter-title">References</div>
+  </div>
+
+  <h2 class="section-h">Books &amp; Academic Papers</h2>
+
+  <ol style="padding-left: 20px; font-size: 11pt; line-height: 1.9;">
+    <li style="margin-bottom: 10px;">
+      Bird, S., Klein, E., &amp; Loper, E. (2009). <em>Natural Language Processing with Python.</em> O'Reilly Media. ISBN: 978-0-596-51649-9.
+    </li>
+    <li style="margin-bottom: 10px;">
+      Manning, C. D., &amp; Schütze, H. (1999). <em>Foundations of Statistical Natural Language Processing.</em> MIT Press. ISBN: 978-0-262-13360-9.
+    </li>
+    <li style="margin-bottom: 10px;">
+      Jurafsky, D., &amp; Martin, J. H. (2023). <em>Speech and Language Processing</em> (3rd ed. draft). Prentice Hall. Available at: https://web.stanford.edu/~jurafsky/slp3/
+    </li>
+    <li style="margin-bottom: 10px;">
+      Porter, M. F. (1980). An Algorithm for Suffix Stripping. <em>Program: Electronic Library and Information Systems,</em> 14(3), 130–137.
+    </li>
+    <li style="margin-bottom: 10px;">
+      Pang, B., &amp; Lee, L. (2002). Thumbs Up? Sentiment Classification using Machine Learning Techniques. <em>Proceedings of EMNLP 2002,</em> pp. 79–86.
+    </li>
+    <li style="margin-bottom: 10px;">
+      Salton, G., &amp; Buckley, C. (1988). Term-Weighting Approaches in Automatic Text Retrieval. <em>Information Processing &amp; Management,</em> 24(5), 513–523.
+    </li>
+    <li style="margin-bottom: 10px;">
+      Fellbaum, C. (Ed.) (1998). <em>WordNet: An Electronic Lexical Database.</em> MIT Press.
+    </li>
+  </ol>
+
+  <h2 class="section-h">Online Resources &amp; Documentation</h2>
+
+  <ol start="8" style="padding-left: 20px; font-size: 11pt; line-height: 1.9;">
+    <li style="margin-bottom: 10px;">
+      NLTK Project. (2024). <em>NLTK 3.8 Documentation.</em> Retrieved from https://www.nltk.org/
+    </li>
+    <li style="margin-bottom: 10px;">
+      scikit-learn Developers. (2024). <em>scikit-learn: Machine Learning in Python.</em> Retrieved from https://scikit-learn.org/stable/
+    </li>
+    <li style="margin-bottom: 10px;">
+      Pedregosa, F., et al. (2011). scikit-learn: Machine Learning in Python. <em>Journal of Machine Learning Research,</em> 12, 2825–2830.
+    </li>
+    <li style="margin-bottom: 10px;">
+      Porter, M. F. (2006). <em>The Snowball Project.</em> Retrieved from https://snowballstem.org/
+    </li>
+    <li style="margin-bottom: 10px;">
+      Princeton University. (2010). <em>About WordNet.</em> Princeton University. Retrieved from https://wordnet.princeton.edu/
+    </li>
+  </ol>
+
+  <div style="margin-top: 30px; padding: 18px; border: 1.5px solid var(--border); border-radius: 4px; background: var(--light-bg); text-align: center;">
+    <p style="font-size: 10pt; color: var(--light-text); font-style: italic; margin-bottom: 8px;">
+      "Language is the most massive and inclusive art we know, a mountainous and anonymous work of unconscious generations."
+    </p>
+    <p style="font-size: 9.5pt; font-weight: 700; color: var(--primary);">— Edward Sapir, Language (1921)</p>
+  </div>
+
+  <div style="margin-top: 28px; border-top: 2px solid var(--primary); padding-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div style="text-align: center;">
+      <div style="border-top: 1.5px solid #333; width: 70%; margin: 0 auto 6px;"></div>
+      <div style="font-size: 10pt; font-weight: 700;">Student Signature</div>
+      <div style="font-size: 9pt; color: var(--light-text); margin-top: 2px;">Name &amp; Roll Number</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="border-top: 1.5px solid #333; width: 70%; margin: 0 auto 6px;"></div>
+      <div style="font-size: 10pt; font-weight: 700;">Supervisor Signature</div>
+      <div style="font-size: 9pt; color: var(--light-text); margin-top: 2px;">Prof. ________________________</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span class="footer-title">NLP Mini Project — Department of CSE</span>
+    <span class="page-num">12</span>
+  </div>
+</div>
+
+</body>
+</html>

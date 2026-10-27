@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NLP Explorer — Text Analysis Dashboard</title>
+  <meta name="description" content="An interactive NLP dashboard demonstrating Tokenization, Stemming, Lemmatization, BOW and TF-IDF techniques." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-bg"></div>
+    <div class="container">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="url(#grad1)" stroke-width="2"/>
+            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="url(#grad1)" font-size="16" font-weight="700">NLP</text>
+            <defs>
+              <linearGradient id="grad1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <h1 class="logo-title">NLP Explorer</h1>
+          <p class="logo-sub">Text Analysis Dashboard</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="#input-section"    class="nav-link active" data-section="input">Analyze</a>
+        <a href="#bow-section"      class="nav-link"        data-section="bow">BOW</a>
+        <a href="#tfidf-section"    class="nav-link"        data-section="tfidf">TF-IDF</a>
+        <a href="#compare-section"  class="nav-link"        data-section="compare">Compare</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── HERO ───────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+    <div class="container">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Interactive NLP Mini Project
+      </div>
+      <h1 class="hero-title">
+        Decode the Language<br/>
+        <span class="gradient-text">with NLP Techniques</span>
+      </h1>
+      <p class="hero-desc">
+        Explore Tokenization, Stemming, Lemmatization, Bag of Words & TF-IDF
+        through a live, interactive interface. Enter any text below to see it analyzed in real-time.
+      </p>
+      <div class="hero-chips">
+        <span class="chip chip-purple">Tokenization</span>
+        <span class="chip chip-blue">Stemming</span>
+        <span class="chip chip-teal">Lemmatization</span>
+        <span class="chip chip-green">BOW</span>
+        <span class="chip chip-orange">TF-IDF</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── INPUT SECTION ──────────────────────────────────────────────────── -->
+  <section id="input-section" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="step-badge">Step 1</div>
+        <h2>Enter Your Text</h2>
+        <p>Type or paste any text below. Use the sample texts for quick demos.</p>
+      </div>
+
+      <div class="input-card">
+        <div class="sample-btns">
+          <span class="sample-label">Quick samples:</span>
+          <button id="btn-sample-1" class="sample-btn" onclick="loadSample(0)">🤖 Technology</button>
+          <button id="btn-sample-2" class="sample-btn" onclick="loadSample(1)">🌿 Environment</button>
+          <button id="btn-sample-3" class="sample-btn" onclick="loadSample(2)">⚽ Sports</button>
+          <button id="btn-sample-4" class="sample-btn" onclick="loadSample(3)">🏥 Health</button>
+        </div>
+        <textarea id="main-input" class="text-input" rows="6"
+          placeholder="Enter your text here... (e.g., 'The running dogs are happily playing in the beautiful gardens of the city.')"></textarea>
+        <div class="input-footer">
+          <span id="char-count" class="char-count">0 characters</span>
+          <button id="analyze-btn" class="btn-primary" onclick="analyzeText()">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+              <path d="M9 3a6 6 0 100 12A6 6 0 009 3zM1 9a8 8 0 1114.93 4.07l4.38 4.37a1 1 0 01-1.42 1.42l-4.37-4.38A8 8 0 011 9z"/>
+            </svg>
+            Analyze Text
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TOKENIZATION SECTION ───────────────────────────────────────────── -->
+  <section id="tokenization-section" class="section hidden-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="step-badge step-badge-purple">Step 2</div>
+        <h2>Tokenization</h2>
+        <p>Breaking text into individual words and sentences.</p>
+      </div>
+
+      <div class="cards-row">
+        <div class="result-card">
+          <div class="card-head">
+            <div class="card-icon icon-purple">W</div>
+            <div>
+              <h3>Word Tokens</h3>
+              <p class="card-sub" id="word-token-count">— tokens</p>
+            </div>
+          </div>
+          <div id="word-tokens-display" class="tokens-display"></div>
+        </div>
+
+        <div class="result-card">
+          <div class="card-head">
+            <div class="card-icon icon-blue">S</div>
+            <div>
+              <h3>Sentence Tokens</h3>
+              <p class="card-sub" id="sent-token-count">— sentences</p>
+            </div>
+          </div>
+          <div id="sent-tokens-display" class="sent-display"></div>
+        </div>
+
+        <div class="result-card">
+          <div class="card-head">
+            <div class="card-icon icon-teal">C</div>
+            <div>
+              <h3>Clean Tokens</h3>
+              <p class="card-sub" id="clean-token-count">— tokens (stopwords removed)</p>
+            </div>
+          </div>
+          <div id="clean-tokens-display" class="tokens-display"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEMMING & LEMMATIZATION ───────────────────────────────────────── -->
+  <section id="stem-lemma-section" class="section hidden-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="step-badge step-badge-blue">Step 3</div>
+        <h2>Stemming vs Lemmatization</h2>
+        <p>Reducing words to their base or root form for normalization.</p>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-legend">
+            <span class="legend-item legend-orig">Original</span>
+            <span class="legend-item legend-porter">Porter Stem</span>
+            <span class="legend-item legend-snow">Snowball Stem</span>
+            <span class="legend-item legend-lemma">Lemmatized</span>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table id="stem-table" class="nlp-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Original Word</th>
+                <th>Porter Stem</th>
+                <th>Snowball Stem</th>
+                <th>Lemmatized</th>
+              </tr>
+            </thead>
+            <tbody id="stem-table-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="info-cards-row">
+        <div class="info-card info-porter">
+          <h4>🔵 Porter Stemmer</h4>
+          <p>A simple, fast rule-based algorithm. Removes suffixes using a series of heuristic rules. Fast but can produce non-words (e.g., "beauti" from "beautiful").</p>
+        </div>
+        <div class="info-card info-snowball">
+          <h4>🟢 Snowball Stemmer</h4>
+          <p>An improved version of Porter. More aggressive and supports multiple languages. Still rule-based — may create unrecognizable stems.</p>
+        </div>
+        <div class="info-card info-lemma">
+          <h4>🟣 Lemmatization</h4>
+          <p>Uses a vocabulary and morphological analysis to return the base dictionary form. Context-aware and always produces valid words (e.g., "running" → "run").</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BOW SECTION ────────────────────────────────────────────────────── -->
+  <section id="bow-section" class="section hidden-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="step-badge step-badge-green">Step 4</div>
+        <h2>Bag of Words (BOW)</h2>
+        <p>Representing text as word frequency counts — ignoring order and grammar.</p>
+      </div>
+
+      <div class="bow-grid">
+        <div class="bow-formula-card">
+          <h3>📐 How BOW Works</h3>
+          <div class="formula-steps">
+            <div class="formula-step">
+              <div class="step-num">1</div>
+              <div class="step-desc">Build a <strong>vocabulary</strong> of all unique words across all documents</div>
+            </div>
+            <div class="formula-step">
+              <div class="step-num">2</div>
+              <div class="step-desc">For each document, create a <strong>vector</strong> of word counts</div>
+            </div>
+            <div class="formula-step">
+              <div class="step-num">3</div>
+              <div class="step-desc">The result is a <strong>Document-Term Matrix</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bow-stats-card">
+          <h3>📊 Word Frequency Analysis</h3>
+          <div id="bow-bar-chart" class="bar-chart"></div>
+        </div>
+      </div>
+
+      <div class="bow-vector-card">
+        <h3>🔢 BOW Vector Representation</h3>
+        <p class="bow-vector-desc">Each word's count in your input text:</p>
+        <div id="bow-vector-display" class="bow-vector-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TF-IDF SECTION ─────────────────────────────────────────────────── -->
+  <section id="tfidf-section" class="section hidden-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="step-badge step-badge-orange">Step 5</div>
+        <h2>TF-IDF Analysis</h2>
+        <p>Term Frequency × Inverse Document Frequency — weighing words by importance.</p>
+      </div>
+
+      <div class="formula-card-full">
+        <div class="formula-grid">
+          <div class="formula-item">
+            <div class="formula-label">TF (Term Frequency)</div>
+            <div class="formula-math">TF(t,d) = count(t in d) / |d|</div>
+            <div class="formula-desc">How often a word appears in this document</div>
+          </div>
+          <div class="formula-separator">×</div>
+          <div class="formula-item">
+            <div class="formula-label">IDF (Inverse Doc Frequency)</div>
+            <div class="formula-math">IDF(t) = log(N / (1 + df(t))) + 1</div>
+            <div class="formula-desc">How rare the word is across all documents</div>
+          </div>
+          <div class="formula-separator">=</div>
+          <div class="formula-item formula-result">
+            <div class="formula-label">TF-IDF Score</div>
+            <div class="formula-math">TF-IDF = TF × IDF</div>
+            <div class="formula-desc">High score = important & rare word</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tfidf-results">
+        <div class="tfidf-table-card">
+          <h3>📋 TF-IDF Scores</h3>
+          <div class="table-wrapper">
+            <table id="tfidf-table" class="nlp-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Term</th>
+                  <th>TF Score</th>
+                  <th>IDF Score</th>
+                  <th>TF-IDF Score</th>
+                  <th>Importance</th>
+                </tr>
+              </thead>
+              <tbody id="tfidf-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tfidf-viz-card">
+          <h3>📊 TF-IDF Visualization</h3>
+          <div id="tfidf-bar-chart" class="bar-chart tfidf-bars"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── COMPARISON SECTION ─────────────────────────────────────────────── -->
+  <section id="compare-section" class="section hidden-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="step-badge step-badge-pink">Step 6</div>
+        <h2>BOW vs TF-IDF Comparison</h2>
+        <p>See how BOW and TF-IDF rank the same words differently.</p>
+      </div>
+
+      <div class="compare-cards">
+        <div class="compare-card compare-bow">
+          <div class="compare-head">
+            <div class="compare-icon">🟦</div>
+            <div>
+              <h3>Bag of Words</h3>
+              <p>Ranks by raw frequency</p>
+            </div>
+          </div>
+          <div id="bow-ranking" class="ranking-list"></div>
+          <div class="compare-footer">
+            <span>❌ Gives high scores to common words (the, is, a)</span>
+          </div>
+        </div>
+
+        <div class="compare-vs">VS</div>
+
+        <div class="compare-card compare-tfidf">
+          <div class="compare-head">
+            <div class="compare-icon">🟧</div>
+            <div>
+              <h3>TF-IDF</h3>
+              <p>Ranks by weighted importance</p>
+            </div>
+          </div>
+          <div id="tfidf-ranking" class="ranking-list"></div>
+          <div class="compare-footer">
+            <span>✅ Penalizes common words, rewards unique terms</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <h3>🎓 Key Takeaways</h3>
+        <div class="takeaways-grid">
+          <div class="takeaway">
+            <div class="takeaway-icon">🔤</div>
+            <h4>Tokenization</h4>
+            <p>First step in any NLP pipeline. Splits text into words/sentences for further processing.</p>
+          </div>
+          <div class="takeaway">
+            <div class="takeaway-icon">✂️</div>
+            <h4>Stemming</h4>
+            <p>Fast but crude. Good for search engines where speed > precision.</p>
+          </div>
+          <div class="takeaway">
+            <div class="takeaway-icon">📖</div>
+            <h4>Lemmatization</h4>
+            <p>Slower but accurate. Best for tasks needing linguistic precision (e.g., QA systems).</p>
+          </div>
+          <div class="takeaway">
+            <div class="takeaway-icon">🧮</div>
+            <h4>BOW</h4>
+            <p>Simple and fast. Good baseline for classification. Ignores word order.</p>
+          </div>
+          <div class="takeaway">
+            <div class="takeaway-icon">⚖️</div>
+            <h4>TF-IDF</h4>
+            <p>More informative than BOW. Penalizes common stop-words naturally.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ──────────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container">
+      <p>NLP Mini Project &mdash; Built with ❤️ using Python, NLTK & scikit-learn</p>
+      <p class="footer-tech">Tokenization &bull; Stemming &bull; Lemmatization &bull; BOW &bull; TF-IDF</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
